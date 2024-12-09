@@ -19,10 +19,6 @@ GRANT USAGE ON SCHEMA public TO PROFESOR;
 CREATE USER profesor_user_1 WITH PASSWORD '123456';
 GRANT PROFESOR TO profesor_user_1;
 
-
-
-
-
 CREATE USER Pepe WITH PASSWORD 'contraseña1';
 GRANT recolector TO Pepe;
 
