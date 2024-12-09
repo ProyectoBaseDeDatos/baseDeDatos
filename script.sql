@@ -1,4 +1,3 @@
--- Eliminar la base de datos si ya existe
 
 -- Crear tablas
 CREATE TABLE KINGDOM (
@@ -145,7 +144,6 @@ CREATE TABLE TAXONOMIA (
     SPECIFICEPITHET INT REFERENCES EPITELOESPECIFICO (ID_SPECIFICEPITHET) ON DELETE SET NULL
 );
 
--- Inserciones (mismas que las indicadas previamente)
 -- Insertar reinos
 INSERT INTO KINGDOM (NAME_KINGDOM) VALUES ('Animalia');
 
