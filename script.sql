@@ -1,229 +1,427 @@
+DROP TABLE IF EXISTS "kingdom";
+DROP TABLE IF EXISTS "phylum";
+DROP TABLE IF EXISTS "class";
+DROP TABLE IF EXISTS "Order";
+DROP TABLE IF EXISTS "family";
+DROP TABLE IF EXISTS "Genus";
+DROP TABLE IF EXISTS "EpiteloEspecifico";
+DROP TABLE IF EXISTS "IMAGENES";
+DROP TABLE IF EXISTS "Ubicacion";
+DROP TABLE IF EXISTS "Persona";
+DROP TABLE IF EXISTS "Rol";
+DROP TABLE IF EXISTS "usuario";
+DROP TABLE IF EXISTS "Instituto";
+DROP TABLE IF EXISTS "TRABAJADOR";
+DROP TABLE IF EXISTS "Evento_de_Coleccion";
+DROP TABLE IF EXISTS "descripcion_colecta";
+DROP TABLE IF EXISTS "metodoDePrepacion";
+DROP TABLE IF EXISTS "Especimen";
+DROP TABLE IF EXISTS "TAXONOMIA";
+DROP TABLE IF EXISTS "datosRecoleccion";
+DROP TABLE IF EXISTS "contribuidores";
+DROP TABLE IF EXISTS "especimen_imagenes";
+DROP TABLE IF EXISTS "TRABAJADOR_INSTITUCION";
+DROP TABLE IF EXISTS "INSTITUTO_COLECTAS";
 
--- Crear tablas
-CREATE TABLE KINGDOM (
-    ID_KINGDOM SERIAL PRIMARY KEY,
-    NAME_KINGDOM TEXT NOT NULL
+-- Create kingdom table
+CREATE TABLE kingdom (
+    ID_kingdom SERIAL PRIMARY KEY,
+    name_kingdom TEXT
 );
 
-CREATE TABLE PHYLUM (
-    ID_PHYLUM SERIAL PRIMARY KEY,
-    NAME_PHYLUM TEXT NOT NULL,
-    ID_REINO INT REFERENCES KINGDOM (ID_KINGDOM) ON DELETE CASCADE
+
+-- Create phylum table
+CREATE TABLE phylum (
+    id_phylum SERIAL PRIMARY KEY,
+    name_phylum TEXT,
+    id_reino INTEGER REFERENCES kingdom(ID_kingdom)
 );
 
-CREATE TABLE CLASS (
-    ID_CLASS SERIAL PRIMARY KEY,
-    NAME_CLASS TEXT NOT NULL,
-    ID_PHYLUM INT REFERENCES PHYLUM (ID_PHYLUM) ON DELETE CASCADE
+
+-- Create class table
+CREATE TABLE class (
+    id_class SERIAL PRIMARY KEY,
+    name_class TEXT,
+    id_phylum INTEGER REFERENCES phylum(id_phylum)
 );
 
-CREATE TABLE TAXONOMIAORDER (
-    ID_ORDER SERIAL PRIMARY KEY,
-    NAME_ORDER TEXT NOT NULL,
-    ID_CLASS INT REFERENCES CLASS (ID_CLASS) ON DELETE CASCADE
+
+-- Create Order table
+CREATE TABLE "Order" (
+    id_order SERIAL PRIMARY KEY,
+    name_order TEXT,
+    id_class INTEGER REFERENCES class(id_class)
 );
 
-CREATE TABLE FAMILY (
-    ID_FAMILY SERIAL PRIMARY KEY,
-    NAME_FAMILY TEXT NOT NULL,
-    ID_ORDER INT REFERENCES TAXONOMIAORDER (ID_ORDER) ON DELETE CASCADE
+
+-- Create family table
+CREATE TABLE family (
+    id_family SERIAL PRIMARY KEY,
+    name_family TEXT,
+    id_order INTEGER REFERENCES "Order"(id_order)
 );
 
-CREATE TABLE GENUS (
-    ID_GENUS SERIAL PRIMARY KEY,
-    GENUS TEXT NOT NULL,
-    ID_FAMILY INT REFERENCES FAMILY(ID_FAMILY) ON DELETE CASCADE
+
+-- Create Genus table
+CREATE TABLE Genus (
+    id_genus SERIAL PRIMARY KEY,
+    genus TEXT,
+    id_family INTEGER REFERENCES family(id_family)
 );
 
-CREATE TABLE EPITELOESPECIFICO (
-    ID_SPECIFICEPITHET SERIAL PRIMARY KEY,
-    EPITHET TEXT NOT NULL
+
+-- Create EpiteloEspecifico table
+CREATE TABLE EpiteloEspecifico (
+    id_specificEpithet SERIAL PRIMARY KEY,
+    epithet TEXT
 );
 
-CREATE TABLE ESPECIMEN (
-    CATALOGNUMBER SERIAL PRIMARY KEY,
-    SCIENTIFICNAME TEXT NOT NULL,
-    LIFESTAGE TEXT,
-    SEX TEXT,
-    INDIVIDUALCOUNT INT
-);
 
+-- Create IMAGENES table
 CREATE TABLE IMAGENES (
-    ID_FOTO SERIAL PRIMARY KEY,
-    URL TEXT NOT NULL
+    id_foto SERIAL PRIMARY KEY,
+    url TEXT,
+    idTipo INTEGER
 );
 
-CREATE TABLE UBICACION (
-    ID_UBICACION SERIAL PRIMARY KEY,
-    LATITUD NUMERIC,
-    LONGITUD NUMERIC,
-    ALTITUD NUMERIC,
-    LOCALITY TEXT,
-    HABITAT TEXT,
-    NOTAS TEXT
+
+-- Create Ubicacion table
+CREATE TABLE Ubicacion (
+    ID_Ubicacion SERIAL PRIMARY KEY,
+    decimalLatitude NUMERIC,
+    decimalLongitude NUMERIC,
+    locality TEXT,
+    habitat TEXT,
+    notas TEXT,
+    pais TEXT
 );
 
-CREATE TABLE EVENTO_DE_COLECCION (
-    ID_EVENTO_RECOLECCION SERIAL PRIMARY KEY,
-    EVENT_DATE TIMESTAMP NOT NULL,
-    ID_UBICACION INT REFERENCES UBICACION (ID_UBICACION) ON DELETE CASCADE
+
+-- Create Persona table
+CREATE TABLE Persona (
+    ID_Persona SERIAL PRIMARY KEY,
+    nombre TEXT,
+    apellido_paterno TEXT,
+    apellido_maternos TEXT,
+    edad INTEGER,
+    telefono TEXT,
+    nacionalidad TEXT
 );
 
-CREATE TABLE INFO_RECOLECCION (
-    ID_RECOLECCION SERIAL PRIMARY KEY,
-    EVENTO INT REFERENCES EVENTO_DE_COLECCION (ID_EVENTO_RECOLECCION) ON DELETE CASCADE
+
+-- Create Rol table
+CREATE TABLE Rol (
+    ID_Rol SERIAL PRIMARY KEY,
+    nombre TEXT
 );
 
-CREATE TABLE PERSONA (
-    ID_PERSONA SERIAL PRIMARY KEY,
-    NOMBRE TEXT NOT NULL,
-    APELLIDO TEXT NOT NULL,
-    EDAD INT CHECK (EDAD >= 0),
-    TELEFONO TEXT,
-    NACIONALIDAD TEXT
+
+-- Create usuario table
+CREATE TABLE usuario (
+    id_Persona INTEGER REFERENCES Persona(ID_Persona),
+    id_usuario UUID PRIMARY KEY,
+    contraseña TEXT,
+    email TEXT
 );
 
-CREATE TABLE JERARQUIA (
-    ID_JERARQUIA SERIAL PRIMARY KEY,
-    NOMBRE TEXT NOT NULL
+
+-- Create Instituto table
+CREATE TABLE Instituto (
+    ID_instituto SERIAL PRIMARY KEY,
+    nombre TEXT,
+    direccion TEXT
 );
 
+
+-- Create TRABAJADOR table
 CREATE TABLE TRABAJADOR (
     ID_TRABAJADOR SERIAL PRIMARY KEY,
-    TIPO_TRABAJADOR INT REFERENCES JERARQUIA (ID_JERARQUIA) ON DELETE SET NULL,
-    ID_PERSONA INT REFERENCES PERSONA (ID_PERSONA) ON DELETE CASCADE
+    ID_PERSONA INTEGER REFERENCES Persona(ID_Persona),
+    role INTEGER REFERENCES Rol(ID_Rol)
 );
 
-CREATE TABLE INSTITUTO (
-    ID_INSTITUTO SERIAL PRIMARY KEY,
-    NOMBRE TEXT NOT NULL,
-    DIRECCION TEXT
+
+-- Create Evento_de_Coleccion table
+CREATE TABLE Evento_de_Coleccion (
+    ID_Evento_Recoleccion SERIAL PRIMARY KEY,
+    event_date TIMESTAMP,
+    ID_Ubicacion INTEGER REFERENCES Ubicacion(ID_Ubicacion),
+    ID_RECOLECTOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR)
 );
 
+
+-- Create descripcion_colecta table
+CREATE TABLE descripcion_colecta (
+    id_evento INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion),
+    descripcion TEXT
+);
+
+
+-- Create metodoDePrepacion table
+CREATE TABLE metodoDePrepacion (
+    ID_preparacion SERIAL PRIMARY KEY,
+    descripcion_metodo TEXT
+);
+
+
+-- Create Especimen table
+CREATE TABLE Especimen (
+    ID_Evento_Recoleccion INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion),
+    ID_metodo INTEGER REFERENCES metodoDePrepacion(ID_preparacion),
+    catalogNumber SERIAL PRIMARY KEY,
+    scientificName TEXT,
+    lifeStage TEXT,
+    sex TEXT,
+    individualCount INTEGER,
+    estado TEXT CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision'))
+);
+
+
+-- Create TAXONOMIA table
+CREATE TABLE TAXONOMIA (
+    taxonID UUID PRIMARY KEY,
+    ID_especimen INTEGER REFERENCES Especimen(catalogNumber),
+    Tipo TEXT,
+    scientificName TEXT,
+    kingdom INTEGER REFERENCES kingdom(ID_kingdom),
+    phylum INTEGER REFERENCES phylum(id_phylum),
+    class INTEGER REFERENCES class(id_class),
+    "order" INTEGER REFERENCES "Order"(id_order),
+    family INTEGER REFERENCES family(id_family),
+    genus INTEGER REFERENCES Genus(id_genus),
+    specificEpithet INTEGER REFERENCES EpiteloEspecifico(id_specificEpithet)
+);
+
+
+-- Create datosRecoleccion table
+CREATE TABLE datosRecoleccion (
+    id_datos SERIAL PRIMARY KEY,
+    id_especimen INTEGER REFERENCES Especimen(catalogNumber),
+    fecha_recoleccion TIMESTAMP,
+    fecha_identificacion TIMESTAMP,
+    fecha_validacion TIMESTAMP
+);
+
+
+-- Create contribuidores table
+CREATE TABLE contribuidores (
+    id SERIAL,
+    id_datos_recoleccion INTEGER REFERENCES datosRecoleccion(id_datos),
+    nombre_trabajador TEXT,
+    accion TEXT,
+    detalles TEXT
+);
+
+
+-- Create especimen_imagenes table
+CREATE TABLE especimen_imagenes (
+    id_especimen INTEGER REFERENCES Especimen(catalogNumber),
+    id_foto INTEGER REFERENCES IMAGENES(id_foto),
+    PRIMARY KEY (id_especimen, id_foto)
+);
+
+
+-- Create TRABAJADOR_INSTITUCION table
 CREATE TABLE TRABAJADOR_INSTITUCION (
-    ID_TRABAJADOR INT REFERENCES TRABAJADOR (ID_TRABAJADOR),
-    ID_INSTITUCION INT REFERENCES INSTITUTO (ID_INSTITUTO),
+    ID_TRABAJADOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR),
+    ID_INSTITUCION INTEGER REFERENCES Instituto(ID_instituto),
     PRIMARY KEY (ID_TRABAJADOR, ID_INSTITUCION)
 );
 
+
+-- Create INSTITUTO_COLECTAS table
 CREATE TABLE INSTITUTO_COLECTAS (
-    ID_INSTITUCION INT REFERENCES INSTITUTO (ID_INSTITUTO),
-    ID_EVENTO_RECOLECCION INT REFERENCES EVENTO_DE_COLECCION (ID_EVENTO_RECOLECCION),
-    PRIMARY KEY (ID_INSTITUCION, ID_EVENTO_RECOLECCION)
+    ID_INSTITUCION INTEGER REFERENCES Instituto(ID_instituto),
+    ID_Evento_Recoleccion INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion),
+    PRIMARY KEY (ID_INSTITUCION, ID_Evento_Recoleccion)
 );
 
-CREATE TABLE TAXON_COLECTA (
-    ID_RECOLECCION INT REFERENCES INFO_RECOLECCION (ID_RECOLECCION),
-    ESPECIMEN INT REFERENCES ESPECIMEN (CATALOGNUMBER),
-    PRIMARY KEY (ID_RECOLECCION, ESPECIMEN)
-);
+-- valores a insertar
 
-CREATE TABLE PARTICIPACION_RECOLECCION (
-    ID_RECOLECCION INT REFERENCES INFO_RECOLECCION (ID_RECOLECCION),
-    ID_TRABAJADOR INT REFERENCES TRABAJADOR (ID_TRABAJADOR),
-    PRIMARY KEY (ID_RECOLECCION, ID_TRABAJADOR)
-);
 
-CREATE TABLE ESPECIMEN_IMAGENES (
-    ID_ESPECIMEN INT REFERENCES ESPECIMEN (CATALOGNUMBER),
-    ID_FOTO INT REFERENCES IMAGENES (ID_FOTO),
-    PRIMARY KEY (ID_ESPECIMEN, ID_FOTO)
-);
 
-CREATE TABLE TAXONOMIA (
-    TAXONID UUID PRIMARY KEY DEFAULT GEN_RANDOM_UUID(),
-    ID_ESPECIMEN INT REFERENCES ESPECIMEN (CATALOGNUMBER),
-    TIPO TEXT NOT NULL,
-    SCIENTIFICNAME TEXT NOT NULL,
-    KINGDOM INT REFERENCES KINGDOM (ID_KINGDOM) ON DELETE SET NULL,
-    PHYLUM INT REFERENCES PHYLUM (ID_PHYLUM) ON DELETE SET NULL,
-    CLASS INT REFERENCES CLASS (ID_CLASS) ON DELETE SET NULL,
-    ORDER_TAXONOMIA INT REFERENCES TAXONOMIAORDER (ID_ORDER) ON DELETE SET NULL,
-    FAMILY INT REFERENCES FAMILY(ID_FAMILY) ON DELETE SET NULL,
-    GENUS INT REFERENCES GENUS (ID_GENUS) ON DELETE SET NULL,
-    SPECIFICEPITHET INT REFERENCES EPITELOESPECIFICO (ID_SPECIFICEPITHET) ON DELETE SET NULL
-);
+-- Insertar en la tabla kingdom
+INSERT INTO kingdom (name_kingdom) VALUES 
+('Animalia');
 
--- Insertar reinos
-INSERT INTO KINGDOM (NAME_KINGDOM) VALUES ('Animalia');
+-- Insertar en la tabla phylum
+INSERT INTO phylum (name_phylum, id_reino) VALUES 
+('Arthropoda', 1);
 
--- Insertar filos
-INSERT INTO PHYLUM (NAME_PHYLUM, ID_REINO) VALUES ('Arthropoda', 1);
+-- Insertar en la tabla class
+INSERT INTO class (name_class, id_phylum) VALUES 
+('Insecta', 1);
 
--- Insertar clases
-INSERT INTO CLASS (NAME_CLASS, ID_PHYLUM) VALUES ('Insecta', 1);
+-- Insertar en la tabla "Order"
+INSERT INTO "Order" (name_order, id_class) VALUES 
+('Coleoptera', 1),
+('Lepidoptera', 1),
+('Hymenoptera', 1),
+('Diptera', 1),
+('Hemiptera', 1);
 
--- Insertar órdenes
-INSERT INTO TAXONOMIAORDER (NAME_ORDER, ID_CLASS) VALUES ('Coleoptera', 1);
+-- Insertar en la tabla family
+INSERT INTO family (name_family, id_order) VALUES 
+('Carabidae', 1),
+('Nymphalidae', 2),
+('Apidae', 3),
+('Culicidae', 4),
+('Reduviidae', 5);
 
--- Insertar familias
-INSERT INTO FAMILY (NAME_FAMILY, ID_ORDER) VALUES ('Carabidae', 1);
+-- Insertar en la tabla Genus
+INSERT INTO Genus (genus, id_family) VALUES 
+('Carabus', 1),
+('Danaus', 2),
+('Apis', 3),
+('Aedes', 4),
+('Triatoma', 5);
 
--- Insertar géneros
-INSERT INTO GENUS (GENUS, ID_FAMILY) VALUES ('Brachinus', 1);
+-- Insertar en la tabla EpiteloEspecifico
+INSERT INTO EpiteloEspecifico (epithet) VALUES 
+('auratus'),
+('plexippus'),
+('mellifera'),
+('aegypti'),
+('infestans');
 
--- Insertar epítetos específicos
-INSERT INTO EPITELOESPECIFICO (EPITHET) VALUES ('crepitans');
+-- Insertar en la tabla IMAGENES
+INSERT INTO IMAGENES (url, idTipo) VALUES 
+('https://example.com/carabus_auratus.jpg', 1),
+('https://example.com/danaus_plexippus.jpg', 2),
+('https://example.com/apis_mellifera.jpg', 3),
+('https://example.com/aedes_aegypti.jpg', 4),
+('https://example.com/triatoma_infestans.jpg', 5);
 
--- Insertar ubicaciones
-INSERT INTO UBICACION (LATITUD, LONGITUD, ALTITUD, LOCALITY, HABITAT, NOTAS) 
-VALUES (19.4326, -99.1332, 2240, 'Ciudad de México', 'Bosque templado', 'Zona protegida con alta biodiversidad');
+-- Las inserciones en la tabla Ubicacion se mantienen igual
+INSERT INTO Ubicacion (decimalLatitude, decimalLongitude, locality, habitat, notas, pais) VALUES 
+(19.4326, -99.1332, 'Ciudad de México', 'Urbano', 'Centro de la ciudad', 'México'),
+(20.6736, -103.3444, 'Guadalajara', 'Bosque', 'Cerca de un río', 'México'),
+(25.6866, -100.3161, 'Monterrey', 'Montaña', 'Altitud elevada', 'México'),
+(17.0732, -96.7266, 'Oaxaca', 'Selva', 'Alta biodiversidad', 'México'),
+(21.1619, -86.8515, 'Cancún', 'Playa', 'Zona costera', 'México');
+-- Las inserciones en las tablas Persona, Rol, usuario, Instituto, y TRABAJADOR se mantienen igual
+INSERT INTO Ubicacion (decimalLatitude, decimalLongitude, locality, habitat, notas, pais) VALUES 
+(19.4326, -99.1332, 'Ciudad de México', 'Urbano', 'Centro de la ciudad', 'México'),
+(20.6736, -103.3444, 'Guadalajara', 'Bosque', 'Cerca de un río', 'México'),
+(25.6866, -100.3161, 'Monterrey', 'Montaña', 'Altitud elevada', 'México'),
+(17.0732, -96.7266, 'Oaxaca', 'Selva', 'Alta biodiversidad', 'México'),
+(21.1619, -86.8515, 'Cancún', 'Playa', 'Zona costera', 'México');
 
--- Insertar eventos de colección
-INSERT INTO EVENTO_DE_COLECCION (EVENT_DATE, ID_UBICACION)
-VALUES ('2024-01-15 10:00:00', 1);
+-- Insertar en la tabla Persona
+INSERT INTO Persona (nombre, apellido_paterno, apellido_maternos, edad, telefono, nacionalidad) VALUES 
+('Juan', 'García', 'López', 35, '5551234567', 'Mexicana'),
+('alex', 'Rodríguez', 'Hernández', 28, '5559876543', 'Mexicana'),
+('Carlos', 'Martínez', 'Gómez', 42, '5555555555', 'Mexicana'),
+('Ana', 'López', 'Sánchez', 31, '5552223333', 'Mexicana'),
+('Pedro', 'Hernández', 'Ramírez', 39, '5554446666', 'Mexicana');
 
--- Insertar información de recolección
-INSERT INTO INFO_RECOLECCION (EVENTO) VALUES (1);
+-- Insertar en la tabla Rol
+INSERT INTO Rol (nombre) VALUES 
+('Colecotor'),
+('Investigador'),
+('profesor');
 
--- Insertar personas
-INSERT INTO PERSONA (NOMBRE, APELLIDO, EDAD, TELEFONO, NACIONALIDAD)
-VALUES ('Juan', 'Pérez', 35, '5551234567', 'Mexicana');
+-- Insertar en la tabla usuario
+INSERT INTO usuario (id_Persona, id_usuario, contraseña, email) VALUES 
+(1, gen_random_uuid(), 'password1', 'juan@example.com'),
+(2, gen_random_uuid(), 'password2', 'alex@example.com'),
+(3, gen_random_uuid(), 'password3', 'carlos@example.com'),
+(4, gen_random_uuid(), 'password4', 'ana@example.com'),
+(5, gen_random_uuid(), 'password5', 'pedro@example.com');
 
-INSERT INTO PERSONA (NOMBRE, APELLIDO, EDAD, TELEFONO, NACIONALIDAD)
-VALUES ('Ana', 'Gómez', 28, '5559876543', 'Mexicana');
+-- Insertar en la tabla Instituto
+INSERT INTO Instituto (nombre, direccion) VALUES 
+('Nova Universitas', 'carretera puerto angel');
 
--- Insertar jerarquías
-INSERT INTO JERARQUIA (NOMBRE) VALUES ('Recolector');
-INSERT INTO JERARQUIA (NOMBRE) VALUES ('Profesor');
+-- Insertar en la tabla TRABAJADOR
+INSERT INTO TRABAJADOR (ID_PERSONA, role) VALUES 
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 2),
+(5, 3);
+-- Insertar en la tabla Evento_de_Coleccion
+INSERT INTO Evento_de_Coleccion (event_date, ID_Ubicacion, ID_RECOLECTOR) VALUES 
+('2023-01-15 10:30:00', 1, 1),
+('2023-02-20 14:45:00', 2, 2),
+('2023-03-25 09:15:00', 3, 3),
+('2023-04-30 11:00:00', 4, 1),
+('2023-05-05 16:30:00', 5, 2);
 
--- Insertar trabajadores
-INSERT INTO TRABAJADOR (TIPO_TRABAJADOR, ID_PERSONA) VALUES (1, 1);
-INSERT INTO TRABAJADOR (TIPO_TRABAJADOR, ID_PERSONA) VALUES (2, 2);
+-- Insertar en la tabla descripcion_colecta
+INSERT INTO descripcion_colecta (id_evento, descripcion) VALUES 
+(1, 'Recolección de escarabajos en zona urbana'),
+(2, 'Captura de mariposas en bosque'),
+(3, 'Muestreo de abejas en zona montañosa'),
+(4, 'Recolección de mosquitos en selva tropical'),
+(5, 'Captura de chinches en zona costera');
 
--- Insertar institutos
-INSERT INTO INSTITUTO (NOMBRE, DIRECCION) 
-VALUES ('Instituto Nacional de Ecología', 'Av. Insurgentes Sur 123, Ciudad de México');
+-- Insertar en la tabla metodoDePrepacion
+INSERT INTO metodoDePrepacion (descripcion_metodo) VALUES 
+('Preservación en alcohol'),
+('Montaje en seco'),
+('Montaje en alfileres entomológicos'),
+('Inclusión en resina'),
+('Preparación microscópica');
 
--- Relacionar trabajadores con institutos
-INSERT INTO TRABAJADOR_INSTITUCION (ID_TRABAJADOR, ID_INSTITUCION) VALUES (1, 1);
-INSERT INTO TRABAJADOR_INSTITUCION (ID_TRABAJADOR, ID_INSTITUCION) VALUES (2, 1);
+-- Insertar en la tabla Especimen
+INSERT INTO Especimen (ID_Evento_Recoleccion, ID_metodo, scientificName, lifeStage, sex, individualCount, estado) VALUES 
+(1, 1, 'Carabus auratus', 'Adult', 'Male', 3, 'identificado'),
+(2, 2, 'Danaus plexippus', 'Adult', 'Female', 2, 'validado'),
+(3, 3, 'Apis mellifera', 'Adult', 'Worker', 10, 'pendiente_identificacion'),
+(4, 4, 'Aedes aegypti', 'Adult', 'Female', 5, 'recolectado'),
+(5, 5, 'Triatoma infestans', 'Nymph', 'Unknown', 4, 'necesita_revision');
 
--- Insertar especímenes
-INSERT INTO ESPECIMEN (SCIENTIFICNAME, LIFESTAGE, SEX, INDIVIDUALCOUNT)
-VALUES ('Brachinus crepitans', 'Adulto', 'Macho', 5);
+-- Insertar en la tabla TAXONOMIA
+INSERT INTO TAXONOMIA (taxonID, ID_especimen, Tipo, scientificName, kingdom, phylum, class, "order", family, genus, specificEpithet) VALUES 
+(gen_random_uuid(), 1, 'Species', 'Carabus auratus', 1, 1, 1, 1, 1, 1, 1),
+(gen_random_uuid(), 2, 'Species', 'Danaus plexippus', 1, 1, 1, 2, 2, 2, 2),
+(gen_random_uuid(), 3, 'Species', 'Apis mellifera', 1, 1, 1, 3, 3, 3, 3),
+(gen_random_uuid(), 4, 'Species', 'Aedes aegypti', 1, 1, 1, 4, 4, 4, 4),
+(gen_random_uuid(), 5, 'Species', 'Triatoma infestans', 1, 1, 1, 5, 5, 5, 5);
 
--- Insertar imágenes
-INSERT INTO IMAGENES (URL) VALUES ('https://example.com/brachinus1.jpg');
+-- Insertar en la tabla datosRecoleccion
+INSERT INTO datosRecoleccion (id_especimen, fecha_recoleccion, fecha_identificacion, fecha_validacion) VALUES 
+(1, '2023-01-15 10:30:00', '2023-01-16 14:00:00', '2023-01-17 09:00:00'),
+(2, '2023-02-20 14:45:00', '2023-02-21 11:30:00', '2023-02-22 10:00:00'),
+(3, '2023-03-25 09:15:00', '2023-03-26 13:00:00', NULL),
+(4, '2023-04-30 11:00:00', NULL, NULL),
+(5, '2023-05-05 16:30:00', '2023-05-06 10:00:00', NULL);
+-- Insertar en la tabla contribuidores
+INSERT INTO contribuidores (id_datos_recoleccion, nombre_trabajador, accion, detalles) VALUES 
+(1, 'Juan García', 'Recolector', 'Captura manual de escarabajos'),
+(1, 'Ana López', 'Identificación', 'Análisis morfológico de Carabus auratus'),
+(1, 'Pedro Hernández', 'validacion', 'Captura de mosquitos con aspirador'),
+(2, 'Juan Garcia', 'Recolectar', 'Uso de red para captura de mariposas'),
+(2, 'Ana lópez', 'identificacion', 'Uso de red para captura de mariposas'),
+(2, 'Pedro Hernandez', 'validacion', 'Uso de red para captura de mariposas'),
+(3, 'alex Rofriguez', 'recolector', 'Uso de trampas para abejas'),
+(3, 'Ana López', 'identificacion', 'Uso de trampas para abejas'),
+(4, 'alex Rofriguez', 'recolector', 'Uso de trampas para abejas'),
+(5, 'alex Rofriguez', 'recolector', 'Uso de trampas para abejas'),
+(5, 'Ana López', 'indentificacion', 'Uso de trampas para abejas');
 
--- Relacionar especímenes con imágenes
-INSERT INTO ESPECIMEN_IMAGENES (ID_ESPECIMEN, ID_FOTO) VALUES (1, 1);
+-- Insertar en la tabla especimen_imagenes
+INSERT INTO especimen_imagenes (id_especimen, id_foto) VALUES 
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
 
--- Insertar taxonomía completa para el espécimen
-INSERT INTO TAXONOMIA (ID_ESPECIMEN, TIPO, SCIENTIFICNAME, KINGDOM, PHYLUM, CLASS, ORDER_TAXONOMIA, FAMILY, GENUS, SPECIFICEPITHET)
-VALUES (1, 'Insecto', 'Brachinus crepitans', 1, 1, 1, 1, 1, 1, 1);
+-- Las inserciones en las tablas TRABAJADOR_INSTITUCION y INSTITUTO_COLECTAS se mantienen igual
 
--- Relacionar eventos de recolección con instituciones
-INSERT INTO INSTITUTO_COLECTAS (ID_INSTITUCION, ID_EVENTO_RECOLECCION)
-VALUES (1, 1);
+INSERT INTO TRABAJADOR_INSTITUCION (ID_TRABAJADOR, ID_INSTITUCION) VALUES 
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1);
 
--- Relacionar recolectores con eventos de recolección (participación)
-INSERT INTO PARTICIPACION_RECOLECCION (ID_RECOLECCION, ID_TRABAJADOR)
-VALUES (1, 1);
-
-INSERT INTO PARTICIPACION_RECOLECCION (ID_RECOLECCION, ID_TRABAJADOR)
-VALUES (1, 2);
-
--- Relacionar especímenes recolectados con información de recolección
-INSERT INTO TAXON_COLECTA (ID_RECOLECCION, ESPECIMEN)
-VALUES (1, 1);
+-- Insertar en la tabla INSTITUTO_COLECTAS
+INSERT INTO INSTITUTO_COLECTAS (ID_INSTITUCION, ID_Evento_Recoleccion) VALUES 
+(1, 1),
+(1, 2),
+(1, 3),
+(1, 4),
+(1, 5);
