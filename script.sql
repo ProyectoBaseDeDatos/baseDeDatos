@@ -1,34 +1,33 @@
-DROP TABLE IF EXISTS "kingdom";
-DROP TABLE IF EXISTS "phylum";
-DROP TABLE IF EXISTS "class";
-DROP TABLE IF EXISTS "Order";
-DROP TABLE IF EXISTS "family";
-DROP TABLE IF EXISTS "Genus";
-DROP TABLE IF EXISTS "EpiteloEspecifico";
-DROP TABLE IF EXISTS "IMAGENES";
-DROP TABLE IF EXISTS "Ubicacion";
-DROP TABLE IF EXISTS "Persona";
-DROP TABLE IF EXISTS "Rol";
-DROP TABLE IF EXISTS "usuario";
-DROP TABLE IF EXISTS "Instituto";
-DROP TABLE IF EXISTS "TRABAJADOR";
-DROP TABLE IF EXISTS "Evento_de_Coleccion";
-DROP TABLE IF EXISTS "descripcion_colecta";
-DROP TABLE IF EXISTS "metodoDePrepacion";
-DROP TABLE IF EXISTS "Especimen";
-DROP TABLE IF EXISTS "TAXONOMIA";
-DROP TABLE IF EXISTS "datosRecoleccion";
-DROP TABLE IF EXISTS "contribuidores";
-DROP TABLE IF EXISTS "especimen_imagenes";
-DROP TABLE IF EXISTS "TRABAJADOR_INSTITUCION";
-DROP TABLE IF EXISTS "INSTITUTO_COLECTAS";
+DROP TABLE IF EXISTS kingdom CASCADE;
+DROP TABLE IF EXISTS phylum CASCADE;
+DROP TABLE IF EXISTS class CASCADE;
+DROP TABLE IF EXISTS "Order" CASCADE;
+DROP TABLE IF EXISTS family CASCADE;
+DROP TABLE IF EXISTS Genus CASCADE;
+DROP TABLE IF EXISTS EpiteloEspecifico CASCADE;
+DROP TABLE IF EXISTS IMAGENES CASCADE;
+DROP TABLE IF EXISTS Ubicacion CASCADE;
+DROP TABLE IF EXISTS Persona CASCADE;
+DROP TABLE IF EXISTS Rol CASCADE;
+DROP TABLE IF EXISTS usuario CASCADE;
+DROP TABLE IF EXISTS Instituto CASCADE;
+DROP TABLE IF EXISTS TRABAJADOR CASCADE;
+DROP TABLE IF EXISTS Evento_de_Coleccion CASCADE;
+DROP TABLE IF EXISTS descripcion_colecta CASCADE;
+DROP TABLE IF EXISTS metodoDePrepacion CASCADE;
+DROP TABLE IF EXISTS Especimen CASCADE;
+DROP TABLE IF EXISTS TAXONOMIA CASCADE;
+DROP TABLE IF EXISTS datosRecoleccion CASCADE;
+DROP TABLE IF EXISTS contribuidores CASCADE;
+DROP TABLE IF EXISTS especimen_imagenes CASCADE;
+DROP TABLE IF EXISTS TRABAJADOR_INSTITUCION CASCADE;
+DROP TABLE IF EXISTS INSTITUTO_COLECTAS CASCADE;
 
 -- Create kingdom table
 CREATE TABLE kingdom (
     ID_kingdom SERIAL PRIMARY KEY,
     name_kingdom TEXT
 );
-
 
 -- Create phylum table
 CREATE TABLE phylum (
@@ -37,14 +36,12 @@ CREATE TABLE phylum (
     id_reino INTEGER REFERENCES kingdom(ID_kingdom)
 );
 
-
 -- Create class table
 CREATE TABLE class (
     id_class SERIAL PRIMARY KEY,
     name_class TEXT,
     id_phylum INTEGER REFERENCES phylum(id_phylum)
 );
-
 
 -- Create Order table
 CREATE TABLE "Order" (
@@ -53,14 +50,12 @@ CREATE TABLE "Order" (
     id_class INTEGER REFERENCES class(id_class)
 );
 
-
 -- Create family table
 CREATE TABLE family (
     id_family SERIAL PRIMARY KEY,
     name_family TEXT,
     id_order INTEGER REFERENCES "Order"(id_order)
 );
-
 
 -- Create Genus table
 CREATE TABLE Genus (
@@ -69,13 +64,11 @@ CREATE TABLE Genus (
     id_family INTEGER REFERENCES family(id_family)
 );
 
-
 -- Create EpiteloEspecifico table
 CREATE TABLE EpiteloEspecifico (
     id_specificEpithet SERIAL PRIMARY KEY,
     epithet TEXT
 );
-
 
 -- Create IMAGENES table
 CREATE TABLE IMAGENES (
@@ -83,7 +76,6 @@ CREATE TABLE IMAGENES (
     url TEXT,
     idTipo INTEGER
 );
-
 
 -- Create Ubicacion table
 CREATE TABLE Ubicacion (
@@ -96,7 +88,6 @@ CREATE TABLE Ubicacion (
     pais TEXT
 );
 
-
 -- Create Persona table
 CREATE TABLE Persona (
     ID_Persona SERIAL PRIMARY KEY,
@@ -108,13 +99,11 @@ CREATE TABLE Persona (
     nacionalidad TEXT
 );
 
-
 -- Create Rol table
 CREATE TABLE Rol (
     ID_Rol SERIAL PRIMARY KEY,
     nombre TEXT
 );
-
 
 -- Create usuario table
 CREATE TABLE usuario (
@@ -124,7 +113,6 @@ CREATE TABLE usuario (
     email TEXT
 );
 
-
 -- Create Instituto table
 CREATE TABLE Instituto (
     ID_instituto SERIAL PRIMARY KEY,
@@ -132,14 +120,12 @@ CREATE TABLE Instituto (
     direccion TEXT
 );
 
-
 -- Create TRABAJADOR table
 CREATE TABLE TRABAJADOR (
     ID_TRABAJADOR SERIAL PRIMARY KEY,
     ID_PERSONA INTEGER REFERENCES Persona(ID_Persona),
     role INTEGER REFERENCES Rol(ID_Rol)
 );
-
 
 -- Create Evento_de_Coleccion table
 CREATE TABLE Evento_de_Coleccion (
@@ -149,20 +135,17 @@ CREATE TABLE Evento_de_Coleccion (
     ID_RECOLECTOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR)
 );
 
-
 -- Create descripcion_colecta table
 CREATE TABLE descripcion_colecta (
     id_evento INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion),
     descripcion TEXT
 );
 
-
 -- Create metodoDePrepacion table
 CREATE TABLE metodoDePrepacion (
     ID_preparacion SERIAL PRIMARY KEY,
     descripcion_metodo TEXT
 );
-
 
 -- Create Especimen table
 CREATE TABLE Especimen (
@@ -175,7 +158,6 @@ CREATE TABLE Especimen (
     individualCount INTEGER,
     estado TEXT CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision'))
 );
-
 
 -- Create TAXONOMIA table
 CREATE TABLE TAXONOMIA (
@@ -192,7 +174,6 @@ CREATE TABLE TAXONOMIA (
     specificEpithet INTEGER REFERENCES EpiteloEspecifico(id_specificEpithet)
 );
 
-
 -- Create datosRecoleccion table
 CREATE TABLE datosRecoleccion (
     id_datos SERIAL PRIMARY KEY,
@@ -201,7 +182,6 @@ CREATE TABLE datosRecoleccion (
     fecha_identificacion TIMESTAMP,
     fecha_validacion TIMESTAMP
 );
-
 
 -- Create contribuidores table
 CREATE TABLE contribuidores (
@@ -212,7 +192,6 @@ CREATE TABLE contribuidores (
     detalles TEXT
 );
 
-
 -- Create especimen_imagenes table
 CREATE TABLE especimen_imagenes (
     id_especimen INTEGER REFERENCES Especimen(catalogNumber),
@@ -220,14 +199,12 @@ CREATE TABLE especimen_imagenes (
     PRIMARY KEY (id_especimen, id_foto)
 );
 
-
 -- Create TRABAJADOR_INSTITUCION table
 CREATE TABLE TRABAJADOR_INSTITUCION (
     ID_TRABAJADOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR),
     ID_INSTITUCION INTEGER REFERENCES Instituto(ID_instituto),
     PRIMARY KEY (ID_TRABAJADOR, ID_INSTITUCION)
 );
-
 
 -- Create INSTITUTO_COLECTAS table
 CREATE TABLE INSTITUTO_COLECTAS (
