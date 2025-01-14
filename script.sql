@@ -187,6 +187,7 @@ CREATE TABLE datosRecoleccion (
 CREATE TABLE contribuidores (
     id SERIAL,
     id_datos_recoleccion INTEGER REFERENCES datosRecoleccion(id_datos),
+    id_contribuidor INTEGER REFERENCES Persona(id_Persona)
     nombre_trabajador TEXT,
     accion TEXT,
     detalles TEXT
