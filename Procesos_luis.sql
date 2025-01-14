@@ -5,52 +5,43 @@ CREATE OR REPLACE FUNCTION insertar_especie (
   sexo VARCHAR(255),
   individualCount INT,
   descripcion_metodo VARCHAR(255),
-  imagenes[],
+  imagenes TEXT[],
   fecha_recoleccion DATE,
   nombres_contrubuidores TEXT[],
   apellidos_paternos_contribuidores TEXT[],
   apellido_maternos_contribuidores TEXT[],
   fechas_contribuidores DATE[],
   accion VARCHAR(255),
-  detalles VARCHAR(255)
+  detalles VARCHAR(255),
   decimalLatitude DECIMAL(10,8),
   decimalLongitude DECIMAL(11,8),
   locality VARCHAR(255),
   habitat VARCHAR(255),
   notas VARCHAR(500),
-  pais VARCHAR(255),
-  catalogNumber INT
+  pais VARCHAR(255)
 )
 RETURNS VOID AS $$
 DECLARE 
-  id_preparacion INT,
   especie_duplicada BOOLEAN;
   id_descripcion_recoleccion INT;
-  id_ubicacion INT,
-	id_evento_coleccion INT
+  id_ubicacion INT;
+  id_evento_coleccion INT;
+  id_metodo INT;
+  catalog_number INT;
+  id_datosRecoleccion INT;
 BEGIN 
 
   --insertar imagenes
-  insertar_imagen(imagenes, catalogNumber);
-  -- insertar en la tabla ubicacioon
   SELECT insertar_ubicacion(decimalLatitude,decimalLongitude,locality,habitat,notas,pais) INTO id_ubicacion;
   -- insertamos en la tabla Evento_de__Coleccion
   INSERT INTO Evento_de_Coleccion(event_date, ID_Ubicacion, ID_RECOLECTOR) VALUES (fecha_recoleccion, id_ubicacion, id_recolector) RETURNING id INTO id_evento_coleccion;
   -- insertamos en la tabla descripcion_colecta
-	INSERT INTO descripcion_colecta (id_evento, descripcion) VALUES (id_evento_coleccion, detalles) RETURNING id INTO id_descripcion_recoleccion;
+  INSERT INTO descripcion_colecta (id_evento, descripcion) VALUES (id_evento_coleccion, detalles) RETURNING id INTO id_descripcion_recoleccion;
   -- insertamos en la tabla de metodoDePrepracion
-  SELECT insertar_metodo_recoleccion(descripcion_metodo) INTO id_metodo;
-	
-  -- insertar en la tabla de metodo de preparacion
-  INSERT INTO metodoDePrepacion (descripcion_metodo) VALUES (descripcion_metodo) RETURNING id INTO id_preparacion;
-  -- insertar en la tabla de datos de recoleccion
-  INSERT INTO datosRecoleccion(catalogNumber,fecha_recoleccion) VALUES (catalogNumber, fecha_recoleccion) RETURNING id INTO id_datosRecoleccion;
-  -- insertar en la tabla de contribuidores
-  insertar_contribuidores(nombres_contrubuidores, apellidos_paternos_contribuidores, apellido_maternos_contribuidores, fechas_contribuidores, id_datosRecoleccion);
-  
-
-  -- insertar en la tabla de especimen
+  SELECT insertar_metodo_preparacion(descripcion_metodo) INTO id_metodo; 
+  -- verificar si la especie ya existe
   especie_duplicada = validar_especie_duplicada(scientificName, catalogNumber);
+  -- insertar en la tabla de especimen
   IF(especie_duplicada = FALSE) THEN
     INSERT INTO Especimen(
       ID_Evento_Recoleccion,
@@ -68,16 +59,23 @@ BEGIN
       scientificName,
       lifeStage,
       sexo,
-      individualCount,,
-      'recolectado')
+      individualCount,
+      'recolectado') INTO catalog_number
     ;
+   END IF;
+
+  -- insertar en la tabla de datos de recoleccion
+  INSERT INTO datosRecoleccion(catalogNumber,fecha_recoleccion) VALUES (catalogNumber, fecha_recoleccion) RETURNING id INTO id_datosRecoleccion;
+  -- insertar en la tabla de contribuidores
+  SELECT insertar_contribuidores(nombres_contrubuidores, apellidos_paternos_contribuidores, apellido_maternos_contribuidores, fechas_contribuidores, id_datosRecoleccion);
+  -- insertar en la tabla ubicacioon
+  SELECT insertar_imagen(imagenes, catalog_number);
+  
 END; $$ LANGUAGE plpgsql;
 
 -- Proceso PARA LA INSERCION DE IMAGENES
-CREATE OR RELACE FUNCTION insertar_imagen (
-  urImagenes[],
-  catalogNumber INT,
-) RETURN VOID AS $$
+CREATE OR REPLACE FUNCTION insertar_imagen(urImagenes TEXT[],catalogNumber INT)
+RETURNS VOID AS $$
 DECLARE
   id_imagen INT;
 BEGIN
@@ -90,10 +88,7 @@ END; $$ LANGUAGE plpgsql;
 
 -- PROCESO PARA VALIDAR QUE EXISTAN ESPECIES DUPLICADAS
 
-CREATE OR REPLACE FUNCTION validar_especie_duplicada(
-  scientificName VARCHAR(255),
-  catalogNumber INT,
-)
+CREATE OR REPLACE FUNCTION validar_especie_duplicada(scientificName VARCHAR(255),catalogNumber INT)
 RETURNS BOOLEAN AS $$
 DECLARE
   especie_duplicada BOOLEAN;
@@ -103,16 +98,8 @@ BEGIN
 END; $$ LANGUAGE plpgsql;
 
 -- PROCESOS PARA INSERTAR CONTRIBUIDORES
-CREATE OR REPALCE FUNCTION insertar_contribuidores(
-    contribuidores TEXT[],accionContribuidores TEXT[], 
-    detallesContribuidores TEXT[],
-    fechas DATE[]
-    apellido_maternos_contribuidores TEXT[],
-    apellido_paternos_contribuidores TEXT[],
-    id_datos
-    
-)
-return BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION insertar_contribuidores(contribuidores TEXT[],accionContribuidores TEXT[], detallesContribuidores TEXT[],fechas DATE[],apellido_maternos_contribuidores TEXT[],apellido_paternos_contribuidores TEXT[],id_datos INT)
+RETURNS BOOLEAN AS $$
 DECLARE
   id INT;
 BEGIN 
@@ -134,37 +121,36 @@ END; $$ LANGUAGE plpgsql;
 -- PROCESO PARA INSERTAR LA UBICACION DE LA RECOLECCION
 
 CREATE OR REPLACE FUNCTION insertar_ubicacion(decimalLatitude DECIMAL(10,8),decimalLongitude DECIMAL(11,8),locality VARCHAR(255),habitat VARCHAR(255),notas VARCHAR(500),catalogNumber INT,pais VARCHAR(255))
-RETURN INT AS $$
+RETURNS INT AS $$
 DECLARE
-    id_ubicacion INT
+    id_ubicacion INT;
 BEGIN
     INSERT INTO ubicacion 
     (
       decimalLatitude,
-      decimalLongitude,l
-      ocality,habitat,
+      decimalLongitude,locality,habitat,
       notas,pais) 
     VALUES 
     (
       decimalLatitude,
-			decimalLongitude,
+	  decimalLongitude,
       locality,habitat,
       notas,pais
     ) 
     RETURNING id INTO id_ubicacion;
     RETURN id_ubicacion;
-END;
+END;$$ LANGUAGE plpgsql;
+
 
 --- PROCESO PARA AGREGAR U OBTENER EL ID DEL METODO DE PREPARACION
 
-CREATE OR REPLACE FUNCTION insertar_metodo_recoleccion(descripcion TEXT)
+CREATE OR REPLACE FUNCTION insertar_metodo_preparacion(descripcion TEXT)
 RETURNS INT AS $$
-DECLARE
-    id_metodo INT;
+DECLARE 
+	id_metodo INT;
 BEGIN
     -- Seleccionar el ID del método de preparación basado en la descripción
-    SELECT ID_preparacion 
-    INTO id_metodo 
+    SELECT ID_preparacion INTO id_metodo 
     FROM metodoDePrepacion 
     WHERE descripcion_metodo = descripcion;
 
@@ -183,5 +169,25 @@ END;
 $$
  LANGUAGE plpgsql;
 
-
-
+SELECT insertar_especie(
+    1,  -- id_recolector
+    'Quercus robur',  -- scientificName
+    'Adulto',  -- lifeStage
+    'Masculino',  -- sexo
+    5,  -- individualCount
+    'Recolección manual en campo',  -- descripcion_metodo
+    ARRAY['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],  -- imagenes
+    '2024-01-10',  -- fecha_recoleccion
+    ARRAY['Juan Pérez', 'Ana Gómez'],  -- nombres_contrubuidores
+    ARRAY['Pérez', 'Gómez'],  -- apellidos_paternos_contribuidores
+    ARRAY['López', 'Martínez'],  -- apellido_maternos_contribuidores
+    ARRAY['2024-01-05', '2024-01-06'],  -- fechas_contribuidores
+    'Añadir nueva especie',  -- accion
+    'Detalles sobre la recolección',  -- detalles
+    -34.603684,  -- decimalLatitude
+    -58.381559,  -- decimalLongitude
+    'Buenos Aires',  -- locality
+    'Bosque templado',  -- habitat
+    'Observaciones adicionales sobre la especie.',  -- notas
+    'Argentina'  -- pais
+);
