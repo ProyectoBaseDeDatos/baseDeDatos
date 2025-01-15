@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION insertar_especie (
+CREATE OR REPLACE PROCEDURE insertar_especie (
   id_recolector INT,
   scientificName VARCHAR(255),
   lifeStage VARCHAR(255),
@@ -168,26 +168,3 @@ BEGIN
 END;
 $$
  LANGUAGE plpgsql;
-
-SELECT insertar_especie(
-    1,  -- id_recolector
-    'Quercus robur',  -- scientificName
-    'Adulto',  -- lifeStage
-    'Masculino',  -- sexo
-    5,  -- individualCount
-    'Recolección manual en campo',  -- descripcion_metodo
-    ARRAY['https://example.com/image1.jpg', 'https://example.com/image2.jpg'],  -- imagenes
-    '2024-01-10',  -- fecha_recoleccion
-    ARRAY['Juan Pérez', 'Ana Gómez'],  -- nombres_contrubuidores
-    ARRAY['Pérez', 'Gómez'],  -- apellidos_paternos_contribuidores
-    ARRAY['López', 'Martínez'],  -- apellido_maternos_contribuidores
-    ARRAY['2024-01-05', '2024-01-06'],  -- fechas_contribuidores
-    'Añadir nueva especie',  -- accion
-    'Detalles sobre la recolección',  -- detalles
-    -34.603684,  -- decimalLatitude
-    -58.381559,  -- decimalLongitude
-    'Buenos Aires',  -- locality
-    'Bosque templado',  -- habitat
-    'Observaciones adicionales sobre la especie.',  -- notas
-    'Argentina'  -- pais
-);
