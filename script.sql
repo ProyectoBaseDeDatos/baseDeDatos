@@ -214,10 +214,6 @@ CREATE TABLE INSTITUTO_COLECTAS (
     PRIMARY KEY (ID_INSTITUCION, ID_Evento_Recoleccion)
 );
 
--- valores a insertar
-
-
-
 -- Insertar en la tabla kingdom
 INSERT INTO kingdom (name_kingdom) VALUES 
 ('Animalia');

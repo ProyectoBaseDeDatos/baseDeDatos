@@ -20,3 +20,19 @@ CALL insertar_especie(
   'Healthy specimen with abundant foliage'::VARCHAR, -- notas
   'United States'::VARCHAR -- pais
 );
+
+CALL identificar_especimen(
+  4,                     
+  'Muestra de campo',   
+  'Apis mellifera',     
+  'Animalia',       
+  'Arthropoda',           
+  'Insecta',            
+  'Apis',                  
+  'Hymenoptera',            
+  'Apidae',                  
+  'mellifera',               
+  ARRAY['Juan', 'Ana'],    
+  ARRAY['Pérez', 'López'],  
+  ARRAY['Gómez', 'Hernández']
+);
