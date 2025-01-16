@@ -389,3 +389,20 @@ BEGIN
   
 END; 
 LANGUAGE plpgsql;
+
+
+-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+-- PROCESO PARA ELIMNAR UNA IMAGEN
+
+
+CREATE OR REPLACE PROCEDURE eliminar_imagen(id_especie INT) AS $$
+DECLARE 
+  id_imagen INT;
+BEGIN
+  
+
+END;
+$$ LANGUAGE plpgsql;
+
+
+
