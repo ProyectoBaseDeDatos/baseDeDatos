@@ -237,11 +237,6 @@ CREATE TABLE INSTITUTO_COLECTAS (
     PRIMARY KEY (ID_INSTITUCION, ID_Evento_Recoleccion)
 );
 
-CREATE INDEX idx_phylum_id_kingdom ON phylum(id_reino);
-CREATE INDEX idx_class_id_phylum ON TaxonomicClass(id_phylum);
-CREATE INDEX idx_order_id_class ON TaxonomicOrder(id_class);
-CREATE INDEX idx_family_id_order ON family(id_order);
-
 -- Insertar en la tabla kingdom
 INSERT INTO kingdom (name_kingdom) VALUES 
 ('Animalia');
