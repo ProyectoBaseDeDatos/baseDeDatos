@@ -142,7 +142,7 @@ CREATE TABLE Evento_de_Coleccion (
     estado_del_evento TEXT DEFAULT 'activo',
     ID_Ubicacion INTEGER REFERENCES Ubicacion(ID_Ubicacion) ON DELETE CASCADE,
     CONSTRAINT check_fecha CHECK(fecha_final >= CURRENT_TIMESTAMP),
-    CONSTRAINT check_estado CHECK(estado_del_evento IN ('finalizado'))    
+    CONSTRAINT check_estado CHECK(estado_del_evento IN ('finalizado','activo'))    
 );
 
 -- tabla que relaciona el evento de coleccion con recolectores
@@ -331,7 +331,7 @@ INSERT INTO Instituto (nombre, direccion) VALUES
 ('Nova Universitas', 'carretera puerto angel');
 
 -- Insertar en la tabla TRABAJADOR
-INSERT INTO TRABAJADOR (ID_PERSONA, role) VALUES 
+INSERT INTO TRABAJADOR (ID_TRABAJADOR, id_role) VALUES 
 (1, 1),
 (2, 1),
 (3, 1),
@@ -342,7 +342,8 @@ INSERT INTO Evento_de_Coleccion(fecha_final, maximo_de_especies, estado_del_even
 (CURRENT_TIMESTAMP + INTERVAL '5 day', 100, 'activo', 1),
 (CURRENT_TIMESTAMP + INTERVAL '2 day', 150, 'activo', 2),
 (CURRENT_TIMESTAMP + INTERVAL '6 day', 80, 'activo', 3),
-(CURRENT_TIMESTAMP + INTERVAL '1 day', 120, 'activo', 4);
+(CURRENT_TIMESTAMP + INTERVAL '1 day', 120, 'activo', 4),
+(CURRENT_TIMESTAMP + INTERVAL '1 day', 120, 'activo', 5);
 
 -- relacionar el evento con su recolector
 
@@ -370,7 +371,7 @@ INSERT INTO Especimen (ID_Evento_Recoleccion, ID_metodo, scientificName, lifeSta
 (5, 5, 'Triatoma infestans', 'Nymph', 'Unknown', 4, 'necesita_revision');
 
 -- Insertar en la tabla descripcion_colecta
-INSERT INTO descripcion_colecta (id_especie, descripcion,ubicacion_exacta) VALUES 
+INSERT INTO descripcion_colecta (id_especie, descripcion,ubicacion_exacta_colecta) VALUES 
 (1, 'Recolección de escarabajos en zona urbana','longitud:198 m altitud:198 m'),  
 (2, 'Captura de mariposas en bosque','longitud:198 m altitud:198 m'),
 (3, 'Muestreo de abejas en zona montañosa','longitud:198 m altitud:198 m'),
