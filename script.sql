@@ -26,54 +26,54 @@ DROP TABLE IF EXISTS INSTITUTO_COLECTAS CASCADE;
 -- Create kingdom table
 CREATE TABLE kingdom (
     ID_kingdom SERIAL PRIMARY KEY,
-    name_kingdom TEXT
+    name_kingdom TEXT NOT NULL
 );
 
 -- Create phylum table
 CREATE TABLE phylum (
     id_phylum SERIAL PRIMARY KEY,
-    name_phylum TEXT,
+    name_phylum TEXT NOT NULL,
     id_reino INTEGER REFERENCES kingdom(ID_kingdom) ON DELETE CASCADE
 );
 
 -- Create class table
 CREATE TABLE class (
     id_class SERIAL PRIMARY KEY,
-    name_class TEXT,
+    name_class TEXT NOT NULL,
     id_phylum INTEGER REFERENCES phylum(id_phylum) ON DELETE CASCADE
 );
 
 -- Create Order table
 CREATE TABLE "Order" (
     id_order SERIAL PRIMARY KEY,
-    name_order TEXT,
+    name_order TEXT NOT NULL,
     id_class INTEGER REFERENCES class(id_class) ON DELETE CASCADE
 );
 
 -- Create family table
 CREATE TABLE family (
     id_family SERIAL PRIMARY KEY,
-    name_family TEXT,
+    name_family TEXT NOT NULL,
     id_order INTEGER REFERENCES "Order"(id_order) ON DELETE CASCADE
 );
 
 -- Create Genus table
 CREATE TABLE Genus (
     id_genus SERIAL PRIMARY KEY,
-    genus TEXT,
+    genus TEXT NOT NULL,
     id_family INTEGER REFERENCES family(id_family) ON DELETE CASCADE
 );
 
 -- Create EpiteloEspecifico table
 CREATE TABLE EpiteloEspecifico (
     id_specificEpithet SERIAL PRIMARY KEY,
-    epithet TEXT
+    epithet TEXT NOT NULL
 );
 
 -- Create IMAGENES table
 CREATE TABLE IMAGENES (
     id_foto SERIAL PRIMARY KEY,
-    url TEXT,
+    url TEXT NOT NULL,
     idTipo INTEGER,
     CONSTRAINT check_url_format CHECK (url ~* '^https?://.*$')
 );
@@ -92,12 +92,13 @@ CREATE TABLE Ubicacion (
 -- Create Persona table
 CREATE TABLE Persona (
     ID_Persona SERIAL PRIMARY KEY,
-    nombre TEXT,
-    apellido_paterno TEXT,
-    apellido_maternos TEXT,
-    edad INTEGER,
+    nombre TEXT NOT NULL,
+    apellido_paterno TEXT NOT NULL,
+    apellido_maternos TEXT NOT NULL,
+    edad INTEGER NOT NULL,
     telefono TEXT,
-    nacionalidad TEXT
+    nacionalidad TEXT,
+    CONSTRAINT check_edad CHECK(edad >0 AND edad < 120)
 );
 
 -- Create Rol table
@@ -109,10 +110,11 @@ CREATE TABLE Rol (
 -- Create usuario table
 CREATE TABLE usuario (
     id_Persona INTEGER REFERENCES Persona(ID_Persona) ON DELETE CASCADE,
-    id_usuario UUID PRIMARY KEY,
+    id_usuario UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     contraseña TEXT,
-    email TEXT
-    CONSTRAINT check_email_format CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$')
+    email TEXT,
+    CONSTRAINT check_email_format CHECK (email ~* '^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
+    CONSTRAINT check_contrasena CHECK (LENGTH(contraseña) >= 8)
 );
 
 -- Create Instituto table
@@ -130,18 +132,23 @@ CREATE TABLE TRABAJADOR (
 );
 
 -- Create Evento_de_Coleccion table
+-- MODIFICACION EN ESTA TABLA %%%%%%%%%%%%%%%%%%
 CREATE TABLE Evento_de_Coleccion (
     ID_Evento_Recoleccion SERIAL PRIMARY KEY,
-    event_date TIMESTAMP,
+    fecha_final TIMESTAMP,
+    maximo_de_especies INTEGER CHECK (maximo_de_especies > 0),
+    estado_del_evento TEXT DEFAULT 'activo',
     ID_Ubicacion INTEGER REFERENCES Ubicacion(ID_Ubicacion) ON DELETE CASCADE,
-    ID_RECOLECTOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR) ON DELETE CASCADE
+    CONSTRAINT check_fecha CHECK(fecha_final >= CURRENT_TIMESTAMP)
+    CONSTRAINT check_estado CHECK(estado_del_evento IN ('finalizado'))    
 );
 
--- Create descripcion_colecta table
-CREATE TABLE descripcion_colecta (
-    id_evento INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion) ON DELETE CASCADE,
-    descripcion TEXT
-);
+-- tabla que relaciona el evento de coleccion con recolectores
+-- tabla agregada %%%%%%%%%%%%%%%%%
+CREATE TABLE evento_colectores(
+    id_evento_recoleccion INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion) ON DELETE CASCADE
+    ID_RECOLECTOR INTEGER REFERENCES TRABAJADOR(ID_TRABAJADOR) ON DELETE CASCADE
+)
 
 -- Create metodoDePrepacion table
 CREATE TABLE metodoDePrepacion (
@@ -158,13 +165,21 @@ CREATE TABLE Especimen (
     lifeStage TEXT,
     sex TEXT,
     individualCount INTEGER,
-    estado TEXT CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision'))
+    estado TEXT DEFAULT 'pendiente_identificacion' CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision'))
+);
+
+-- Create descripcion_colecta table
+-- TABLA MODIFICADA %%%%%%%%%%%%%%%
+CREATE TABLE descripcion_colecta (
+    id_especie INTEGER REFERENCES Especimen(catalogNumber) ON DELETE CASCADE,
+    descripcion TEXT,
+    ubicacion_exacta_colecta TEXT,
 );
 
 -- Create TAXONOMIA table
 CREATE TABLE TAXONOMIA (
     taxonID UUID PRIMARY KEY,
-    ID_especimen INTEGER REFERENCES Especimen(catalogNumber) ON DELETE CASCADE,
+    ID_especimen INTEGER REFERENCES Especimen(catalogNumber) ON DELETE CASCADE ON UPDATE CASCADE,
     Tipo TEXT,
     scientificName TEXT,
     kingdom INTEGER REFERENCES kingdom(ID_kingdom) ON DELETE CASCADE,
@@ -184,8 +199,8 @@ CREATE TABLE datosRecoleccion (
     fecha_identificacion TIMESTAMP,
     fecha_validacion TIMESTAMP,
     CONSTRAINT fecha_recoleccion_check CHECK (fecha_recoleccion <= CURRENT_TIMESTAMP),
-    CONSTRAINT fecha_identificacion_check CHECK (fecha_identificacion > fecha_recoleccion),
-    CONSTRAINT fecha_validacion_check CHECK (fecha_validacion > fecha_identificacion)
+    CONSTRAINT fecha_identificacion_check CHECK (fecha_identificacion >= fecha_recoleccion),
+    CONSTRAINT fecha_validacion_check CHECK (fecha_validacion >= fecha_identificacion)
 );
 
 -- Create contribuidores table
@@ -218,6 +233,11 @@ CREATE TABLE INSTITUTO_COLECTAS (
     ID_Evento_Recoleccion INTEGER REFERENCES Evento_de_Coleccion(ID_Evento_Recoleccion),
     PRIMARY KEY (ID_INSTITUCION, ID_Evento_Recoleccion)
 );
+
+CREATE INDEX idx_phylum_id_kingdom ON phylum(id_reino);
+CREATE INDEX idx_class_id_phylum ON TaxonomicClass(id_phylum);
+CREATE INDEX idx_order_id_class ON TaxonomicOrder(id_class);
+CREATE INDEX idx_family_id_order ON family(id_order);
 
 -- Insertar en la tabla kingdom
 INSERT INTO kingdom (name_kingdom) VALUES 

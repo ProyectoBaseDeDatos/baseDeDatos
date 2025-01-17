@@ -1,3 +1,29 @@
+-- PROCESO PARA LA CREACION DE UN EVENTO DE COLECCION
+CREATE OR REPLACE PROCEDURE crear_evento_de_coleccion(
+  decimalLatitude DECIMAL(10,8),
+  decimalLongitude DECIMAL(11,8),
+  locality VARCHAR(255),
+  habitat VARCHAR(255),
+  notas VARCHAR(500),
+  pais VARCHAR(255),
+  fecha_limite DATE,
+  maximo_especies INT,
+) AS $$
+DECLARE
+  id_ubicacion INT;
+BEGIN
+  -- Insertar en la tabla Evento_de_C
+  SELECT insertar_ubicacion(decimalLatitude, decimalLongitude, locality, habitat, notas, pais) INTO id_ubicacion;
+  
+  -- Insertar en la tabla Evento_de_Coleccion
+  INSERT INTO Evento_de_Coleccion(fecha_final,maximo_de_especies,ID_Ubicacion) 
+  VALUES (fecha_final, maximo_especies, id_ubicacion)
+
+END;
+$$ LANGUAGE plpgsql;
+
+-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+-- PROCESOS PARA INSERTAR UNA ESPECIE
 CREATE OR REPLACE PROCEDURE insertar_especie (
   id_recolector INT,
   scientificName VARCHAR(255),
@@ -13,12 +39,9 @@ CREATE OR REPLACE PROCEDURE insertar_especie (
   fechas_contribuidores DATE[],
   accion VARCHAR(255),
   detalles VARCHAR(255),
-  decimalLatitude DECIMAL(10,8),
-  decimalLongitude DECIMAL(11,8),
-  locality VARCHAR(255),
-  habitat VARCHAR(255),
-  notas VARCHAR(500),
-  pais VARCHAR(255)
+  id_evento_coleccion INT,
+  descripcion TEXT,
+  ubicacion_exacta TEXT
 )
 LANGUAGE plpgsql
 AS $$
@@ -31,19 +54,7 @@ DECLARE
   catalog_number INT;
   id_datosRecoleccion INT;
 BEGIN 
-  -- Insertar ubicación
-  SELECT insertar_ubicacion(decimalLatitude, decimalLongitude, locality, habitat, notas, pais) INTO id_ubicacion;
-  
-  -- Insertar en la tabla Evento_de_Coleccion
-  INSERT INTO Evento_de_Coleccion(event_date, ID_Ubicacion, ID_RECOLECTOR) 
-  VALUES (fecha_recoleccion, id_ubicacion, id_recolector) 
-  RETURNING ID_Evento_Recoleccion INTO id_evento_coleccion;
-  
-  -- Insertar en la tabla descripcion_colecta
-  INSERT INTO descripcion_colecta (id_evento, descripcion) 
-  VALUES (id_evento_coleccion, detalles) 
-  RETURNING id_evento INTO id_descripcion_recoleccion;
-  
+ 
   -- Insertar en la tabla de metodoDePreparacion
   SELECT insertar_metodo_preparacion(descripcion_metodo) INTO id_metodo; 
   
@@ -70,6 +81,11 @@ BEGIN
       'recolectado'
     ) RETURNING catalogNumber INTO catalog_number;
   END IF;
+
+  -- Insertar en la tabla descripcion_colecta
+  INSERT INTO descripcion_colecta (id_especie, descripcion,ubicacion_exacta_colecta) 
+  VALUES (catalog_number, descripcion,ubicacion_exacta) 
+  RETURNING id_evento INTO id_descripcion_recoleccion;
 
   -- Insertar en la tabla de datos de recoleccion
   INSERT INTO datosRecoleccion(id_especimen, fecha_recoleccion) 
