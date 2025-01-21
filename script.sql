@@ -331,7 +331,7 @@ INSERT INTO Instituto (nombre, direccion) VALUES
 ('Nova Universitas', 'carretera puerto angel');
 
 -- Insertar en la tabla TRABAJADOR
-INSERT INTO TRABAJADOR (ID_TRABAJADOR, id_role) VALUES 
+INSERT INTO TRABAJADOR (ID_PERSONA, id_role) VALUES 
 (1, 1),
 (2, 1),
 (3, 1),
@@ -417,7 +417,7 @@ INSERT INTO especimen_imagenes (id_especimen, id_foto) VALUES
 
 -- Las inserciones en las tablas TRABAJADOR_INSTITUCION y INSTITUTO_COLECTAS se mantienen igual
 
-INSERT INTO TRABAJADOR_INSTITUCION (ID_PERSONA, ID_INSTITUCION) VALUES 
+INSERT INTO TRABAJADOR_INSTITUCION (ID_TRABAJADOR, ID_INSTITUCION) VALUES 
 (1, 1),
 (2, 1),
 (3, 1),
