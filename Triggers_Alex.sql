@@ -1,3 +1,7 @@
+DROP TRIGGER IF EXISTS trigger_insertar_instituto_colectas ON Evento_de_Coleccion;
+DROP FUNCTION IF EXISTS insertar_en_instituto_colectas;
+DROP TRIGGER IF EXISTS trigger_actualizar_estado_especimen ON Especimen;
+
 --1
 --funcion
 CREATE OR REPLACE FUNCTION insertar_en_instituto_colectas()
@@ -77,37 +81,6 @@ CREATE TRIGGER trigger_actualizar_fecha_recoleccion
 AFTER UPDATE OF estado ON Especimen
 FOR EACH ROW
 EXECUTE FUNCTION actualizar_fecha_recoleccion();
-
-/*--por si falla  LA FUNCION DEL 3
-CREATE OR REPLACE FUNCTION actualizar_fecha_recoleccion()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Actualizar la fecha de identificación si el estado cambia a 'identificado'
-    IF NEW.estado = 'identificado' AND OLD.estado IS DISTINCT FROM 'identificado' THEN
-        UPDATE datosRecoleccion
-        SET fecha_identificacion = CURRENT_TIMESTAMP,
-            fecha_validacion = NULL -- Asegurarse de que fecha_validacion sea nula
-        WHERE id_especimen = NEW.catalogNumber;
-    END IF;
-
-    -- Actualizar la fecha de validación si el estado cambia a 'validado'
-    IF NEW.estado = 'validado' AND OLD.estado IS DISTINCT FROM 'validado' THEN
-        UPDATE datosRecoleccion
-        SET fecha_validacion = CURRENT_TIMESTAMP
-        WHERE id_especimen = NEW.catalogNumber;
-
-        -- Validar que fecha_identificacion esté asignada
-        IF (SELECT fecha_identificacion FROM datosRecoleccion WHERE id_especimen = NEW.catalogNumber) IS NULL THEN
-            RAISE EXCEPTION 'No se puede validar un espécimen sin fecha de identificación previa';
-        END IF;
-    END IF;
-
-    RETURN NEW; -- Continuar con la operación de actualización
-END;
-$$ LANGUAGE plpgsql;
-//
-*/
-
 
 --4
 --funcion
