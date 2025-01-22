@@ -1,0 +1,32 @@
+CREATE OR REPLACE FUNCTION trigger_registro_contribuidores()
+RETURNS TRIGGER AS $$
+DECLARE
+    nombre_trabajador TEXT;
+      persona_id INTEGER;
+BEGIN
+    IF TG_OP = 'INSERT' OR TG_OP = 'UPDATE' THEN
+        -- Obtener el ID de la persona asociada con el trabajador usando id_especimen
+        SELECT t.ID_PERSONA INTO persona_id
+        FROM Trabajador t
+        WHERE t.ID_TRABAJADOR = NEW.id_especimen;
+        
+        -- Obtener el nombre completo del trabajador
+        SELECT CONCAT(p.nombre, ' ', p.apellido_paterno, ' ', p.apellido_maternos) INTO nombre_trabajador
+        FROM Persona p
+        WHERE p.ID_Persona =   persona_id;
+        
+        -- Insertar el registro en contribuidores
+        INSERT INTO contribuidores (id_datos_recoleccion, id_contribuidor, nombre_trabajador, accion, detalles)
+        VALUES (NEW.id_datos,   persona_id, nombre_trabajador, 'Inserción o Actualización', 'Detalles relevantes');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER after_insert_or_update_datos_recoleccion
+AFTER INSERT OR UPDATE ON datosRecoleccion
+FOR EACH ROW
+EXECUTE FUNCTION trigger_registro_contribuidores();
+
+
+
