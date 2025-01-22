@@ -16,9 +16,10 @@ JOIN
     IMAGENES i ON especimen_imagenes.id_foto = i.id_foto
 JOIN
     Especimen e ON especimen_imagenes.ID_especimen = e.catalogNumber;
-SELECT * FROM imagenes_especimen;
 
 DROP VIEW IF EXISTS vista_muestras_con_imagenes;
+
+
 
 --vista muestras imagenes
 CREATE VIEW vista_muestras_con_imagenes AS
@@ -41,7 +42,7 @@ JOIN
 JOIN
     IMAGENES i ON especimen_imagenes.id_foto = i.id_foto;
 
-SELECT * FROM vista_muestras_con_imagenes;
+	
 
 --vista recoleccion por coleccionista
 DROP VIEW IF EXISTS recoleccion_coleccionista;
@@ -66,4 +67,3 @@ JOIN
 JOIN 
     Ubicacion u ON e.ID_Ubicacion = u.ID_Ubicacion;
 
-SELECT* FROM recoleccion_coleccionista;
