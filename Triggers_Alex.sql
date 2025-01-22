@@ -1,6 +1,10 @@
 DROP TRIGGER IF EXISTS trigger_insertar_instituto_colectas ON Evento_de_Coleccion;
 DROP FUNCTION IF EXISTS insertar_en_instituto_colectas;
 DROP TRIGGER IF EXISTS trigger_actualizar_estado_especimen ON Especimen;
+DROP FUNCTION IF EXISTS actualizar_estado_especimen;
+DROP TRIGGER IF EXISTS trigger_actualizar_fecha_recoleccion ON Especimen;
+DROP FUNCTION IF EXISTS actualizar_fecha_recoleccion;
+DROP TRIGGER IF EXISTS trigger_registrar_contribuidor ON datosRecoleccion;
 
 --1
 --funcion
