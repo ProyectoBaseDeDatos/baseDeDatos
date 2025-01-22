@@ -142,7 +142,7 @@ CREATE TABLE Evento_de_Coleccion (
     maximo_de_especies INTEGER CHECK (maximo_de_especies > 0),
     estado_del_evento TEXT DEFAULT 'activo',
     ID_Ubicacion INTEGER REFERENCES Ubicacion(ID_Ubicacion) ON DELETE CASCADE,
-    CONSTRAINT check_fecha CHECK(fecha_final >= CURRENT_TIMESTAMP),
+    CONSTRAINT check_fecha CHECK(fecha_final >= CURRENT_TIMESTAMP ),
     CONSTRAINT check_estado CHECK(estado_del_evento IN ('finalizado','activo'))    
 );
 
@@ -168,7 +168,8 @@ CREATE TABLE Especimen (
     lifeStage TEXT,
     sex TEXT,
     individualCount INTEGER,
-    estado TEXT DEFAULT 'pendiente_identificacion' CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision'))
+    estado TEXT DEFAULT 'pendiente_identificacion' CHECK (estado IN ('recolectado', 'pendiente_identificacion', 'identificado', 'validado', 'necesita_revision')),
+    CONSTRAINT check_individualCount CHECK(individualCount >= 1)
 );
 
 -- Create descripcion_colecta table

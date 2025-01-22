@@ -16,7 +16,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- FUNCION PARA VALIDAR SI LA ESPECIE ESTA DUPLICADA
-CREATE OR REPLACE FUNCTION validar_especie_duplicada(p_scientificName VARCHAR(255), p_catalogNumber INT)
+CREATE OR REPLACE FUNCTION validar_especie_duplicada(p_scientificName VARCHAR(255))
 RETURNS BOOLEAN AS $$
 DECLARE
   especie_duplicada BOOLEAN;
@@ -24,7 +24,7 @@ BEGIN
   SELECT EXISTS(
     SELECT 1 
     FROM especimen 
-    WHERE scientificName = p_scientificName AND catalogNumber = p_catalogNumber
+    WHERE scientificName = p_scientificName
   ) INTO especie_duplicada;
   RETURN especie_duplicada;
 END;
@@ -33,8 +33,8 @@ $$ LANGUAGE plpgsql;
 -- FUNCION PARA INSERTAR LOS DATOS DE LOS CONTRIBUIDORES
 CREATE OR REPLACE FUNCTION insertar_contribuidores(
   contribuidores TEXT[],
-  acciones TEXT,
-  detalles TEXT,
+  acciones TEXT[],
+  detalles TEXT[],
   apellidos_paternos_contribuidores TEXT[],
   apellidos_maternos_contribuidores TEXT[],
   id_datos INT
@@ -52,7 +52,7 @@ BEGIN
       apellido_paterno = apellidos_paternos_contribuidores[i];
 
     INSERT INTO contribuidores(id_datos_recoleccion,nombre_trabajador,accion,detalles) 
-    VALUES (id_datos, contribuidores[i],acciones,detalles);
+    VALUES (id_datos, contribuidores[i],acciones[i],detalles[i]);
   END LOOP;
 END;
 $$ LANGUAGE plpgsql;
@@ -108,6 +108,13 @@ BEGIN
   RETURN id_metodo;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+
+
+
+
 
 -- FUNCIONES PARA VALIDAR ESPECIES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
