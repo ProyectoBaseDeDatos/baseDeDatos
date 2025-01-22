@@ -127,16 +127,7 @@ BEGIN
 END;
 $$;
 
---CALL eliminar_usuario(1);
 
---CALL consultar_todos_usuarios();
-
---CALL consultar_usuario('101cdccf-a5e3-4446-b185-769e6135eeeb');
-
---CALL actualizar_usuario(1, 'nuevoNombre', 'nuevaContraseña456', 'nuevoCorreoEmail@example.com', 3);
-
-
---CALL crear_usuario(1, 'usuarioPrueba', 'usuarioprueba@example.com', 2);
 
 
 
