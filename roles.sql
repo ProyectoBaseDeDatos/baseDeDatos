@@ -5,16 +5,27 @@ CREATE USER coleccionista_user_1 WITH PASSWORD '123456';
 GRANT COLECCIONISTA TO coleccionista_user_1;
 
 GRANT EXECUTE ON PROCEDURE insertar_especie(
-  INT, VARCHAR, VARCHAR, VARCHAR, INT, VARCHAR, TEXT[], DATE, 
-  TEXT[], TEXT[], TEXT[], DATE[], TEXT[], TEXT[], INT, VARCHAR, VARCHAR
+ id_recolector INT,
+  scientificName VARCHAR(255),
+  lifeStage VARCHAR(255),
+  sexo VARCHAR(255),
+  individualCount INT,
+  descripcion_metodo VARCHAR(255),
+  imagenes TEXT[],
+  fecha_recoleccion DATE,
+  nombres_contribuidores TEXT[],
+  apellidos_paternos_contribuidores TEXT[],
+  apellidos_maternos_contribuidores TEXT[],
+  fechas_contribuidores DATE[],
+  accion TEXT[],
+  detalles TEXT[],
+  id_evento_coleccion INT,
+  descripcion TEXT,
+  ubicacion_exacta TEXT
 ) TO COLECCIONISTA;
-GRANT EXECUTE ON PROCEDURE eliminar_imagen(catalogNumber INT) TO COLECCIONISTA;
-GRANT EXECUTE ON FUNCTION sp_contar_muestras_por_coleccionista(p_id_coleccionista INTEGER) TO rol_muestras;
-GRANT EXECUTE ON PROCEDURE sp_agregar_imagen_a_especimen(
-    p_catalogNumber INTEGER,
-    p_url TEXT,
-    p_idTipo INTEGER
-) TO COLECCIONISTA;
+GRANT EXECUTE ON PROCEDURE eliminar_imagen(INT) TO COLECCIONISTA;
+GRANT EXECUTE ON FUNCTION sp_contar_muestras_por_coleccionista(INTEGER) TO rol_muestras;
+
 
 ----------------- IDENTIFICADOR
 CREATE ROLE IDENTIFICADOR;
@@ -37,41 +48,16 @@ GRANT SELECT ON Persona TO IDENTIFICADOR;
 GRANT SELECT ON especies_pendientes TO IDENTIFICADOR;
 
 
-GRANT EXECUTE ON FUNCTION sp_recuperar_muestra_por_id(p_catalogNumber) TO IDENTIFICADOR;
-GRANT EXECUTE ON FUNCTION sp_buscar_especimen_por_taxonomia(p_kingdom INTEGER ,
-    p_phylum INTEGER ,
-    p_class INTEGER ,
-    p_order INTEGER ,
-    p_family INTEGER ,
-    p_genus INTEGER ,
-    p_speficic_epithet INTEGER ) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION sp_recuperar_muestra_por_id(INTEGER) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION sp_buscar_especimen_por_taxonomia(INTEGER, INTEGER, INTEGER, INTEGER, INTEGER, INTEGER, INTEGER) TO IDENTIFICADOR;
 GRANT SELECT ON vista_resumen_muestras TO IDENTIFICADOR;
 GRANT SELECT ON vista_detalle_muestra TO IDENTIFICADOR;
 
 GRANT EXECUTE ON FUNCTION Obtener_especimens(INT) TO IDENTIFICADOR;
 GRANT EXECUTE ON PROCEDURE identificar_especimen(
-  catalogNumber INT,
-  tipo VARCHAR(255),
-  scientificName VARCHAR(255),
-  nameKingdom VARCHAR(255),
-  namePhylum VARCHAR(255),
-  nameClass VARCHAR(255),
-  genus VARCHAR(255),
-  nameOrder VARCHAR(255),
-  nameFamily VARCHAR(255),
-  apithet VARCHAR(255),
-  contribuidores_nombre TEXT[], 
-  apellidos_paternos_contribuidores TEXT[],
-  apellidos_maternos_contribuidores TEXT[],
-  acciones TEXT[],
-  detalles TEXT[]
+  INT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, 
+  TEXT[], TEXT[], TEXT[], TEXT[], TEXT[]
 ) TO IDENTIFICADOR;
-GRANT EXECUTE ON PROCEDURE sp_agregar_imagen_a_especimen(
-    p_catalogNumber INTEGER,
-    p_url TEXT,
-    p_idTipo INTEGER
-) TO IDENTIFICADOR;
-
 GRANT EXECUTE ON FUNCTION insertar_Epitelo(nameEpitelo TEXT) TO IDENTIFICADOR;
 GRANT EXECUTE ON FUNCTION insertar_genus(nameGenus TEXT, idFamily INT) TO IDENTIFICADOR;
 GRANT EXECUTE ON FUNCTION insertar_family(nameFamily TEXT, idOrder INT) TO IDENTIFICADOR;
@@ -95,14 +81,27 @@ GRANT USAGE ON SCHEMA public TO PROFESOR;
 CREATE USER profesor_user_1 WITH PASSWORD '123456';
 GRANT PROFESOR TO profesor_user_1;
 CREATE ROLE PROFESOR;
-GRANT EXECUTE ON FUNCTION validar_usuarios(emailIngresado TEXT, contrasenaIngresada TEXT) TO rol_validacion_usuarios;
+GRANT EXECUTE ON FUNCTION validar_usuarios(TEXT, TEXT) TO rol_validacion_usuarios;
 
 
 GRANT EXECUTE ON PROCEDURE crear_evento_de_coleccion(
   DECIMAL, DECIMAL, VARCHAR, VARCHAR, VARCHAR, VARCHAR, TIMESTAMP, INT
 ) TO PROFESOR;
 
-GRANT EXECUTE ON PROCEDURE Validar_Identificacion_especimen(catalog_number_ingresado INT,id_persona_ingresada INT) TO PROFESOR;
+GRANT EXECUTE ON PROCEDURE Validar_Identificacion_especimen(INT, INT) TO PROFESOR;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 -- USUARIO PARA EL LOGIN
@@ -114,7 +113,3 @@ GRANT SELECT ON trabajador TO USUARIOTEMP;
 
 CREATE USER usuario_temporal WITH PASSWORD '123456';
 GRANT USUARIOTEMP TO usuario_temporal;
-
-
-
-
