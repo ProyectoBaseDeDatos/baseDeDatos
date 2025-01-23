@@ -1,131 +1,94 @@
---procedimiento para crear un usuario
-CREATE OR REPLACE PROCEDURE crear_usuario(
-	--parametros necesarios
-    p_id_persona INT,
-    p_contraseña VARCHAR,
-    p_email VARCHAR,
-    p_id_rol INT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
--- insertar en las tablas correspondientes
-    INSERT INTO usuario (id_persona, id_usuario, contraseña, email)
-    VALUES (p_id_persona, gen_random_uuid(), p_contraseña, p_email);
-    
-    INSERT INTO TRABAJADOR (ID_PERSONA, id_role) 
-    VALUES (p_id_persona, p_id_rol);
-END;
-$$;
+CREATE ROLE COLECCIONISTA;
+GRANT SELECT,INSERT ON ALL TABLES IN SCHEMA public TO COLECCIONISTA;
+CREATE USER coleccionista_user_1 WITH PASSWORD '123456';
 
--- procedimiento para actualizar un usuario
-CREATE OR REPLACE PROCEDURE actualizar_usuario(
-    p_id_persona INT, 
-    p_nombre VARCHAR,
-    p_contraseña VARCHAR,
-    p_email VARCHAR,
-    p_id_rol INT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    UPDATE Persona
-    SET 
-        nombre = p_nombre 
-    WHERE ID_Persona = p_id_persona;  
+GRANT COLECCIONISTA TO coleccionista_user_1;
 
-    UPDATE usuario
-    SET 
-        contraseña = p_contraseña,
-        email = p_email
-    WHERE id_persona = p_id_persona;  
-    -- Actualizar rol del trabajador
-    UPDATE TRABAJADOR
-    SET id_role = p_id_rol 
-    WHERE ID_PERSONA = p_id_persona;
-END;
-$$;
+GRANT EXECUTE ON PROCEDURE insertar_especie(
+ id_recolector INT,
+  scientificName VARCHAR(255),
+  lifeStage VARCHAR(255),
+  sexo VARCHAR(255),
+  individualCount INT,
+  descripcion_metodo VARCHAR(255),
+  imagenes TEXT[],
+  fecha_recoleccion DATE,
+  nombres_contribuidores TEXT[],
+  apellidos_paternos_contribuidores TEXT[],
+  apellidos_maternos_contribuidores TEXT[],
+  fechas_contribuidores DATE[],
+  accion TEXT[],
+  detalles TEXT[],
+  id_evento_coleccion INT,
+  descripcion TEXT,
+  ubicacion_exacta TEXT
+) TO COLECCIONISTA;
+GRANT EXECUTE ON PROCEDURE eliminar_imagen(INT) TO COLECCIONISTA;
+GRANT EXECUTE ON FUNCTION sp_contar_muestras_por_coleccionista(INTEGER) TO rol_muestras;
 
 
+----------------- IDENTIFICADOR
+CREATE ROLE IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON kingdom TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON phylum TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON class TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON "Order" TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON family TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Genus TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON EpiteloEspecifico TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON Especimen TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TAXONOMIA TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE ON datosRecoleccion TO IDENTIFICADOR;
+GRANT SELECT, INSERT, UPDATE, DELETE ON contribuidores TO IDENTIFICADOR;
+GRANT SELECT ON IMAGENES TO IDENTIFICADOR;
+GRANT SELECT ON especimen_imagenes TO IDENTIFICADOR;
+GRANT SELECT ON evento_colectores TO IDENTIFICADOR;
+GRANT SELECT ON descripcion_colecta TO IDENTIFICADOR;
+GRANT SELECT ON Persona TO IDENTIFICADOR;
+GRANT SELECT ON especies_pendientes TO IDENTIFICADOR;
 
---procedimiento para consultar un usuario
-CREATE OR REPLACE PROCEDURE consultar_usuario(
-    p_id_usuario UUID
-)
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    rec RECORD;  
-    cur CURSOR FOR 
-        SELECT 
-            u.id_usuario,
-            p.nombre,
-            u.id_persona,
-            u.email,
-            r.nombre AS rol_nombre
-        FROM usuario u
-        JOIN Persona p ON u.id_persona = p.ID_Persona 
-        JOIN TRABAJADOR t ON p.ID_Persona = t.ID_PERSONA
-        JOIN Rol r ON t.id_role = r.ID_Rol 
-        WHERE u.id_usuario = p_id_usuario;
-BEGIN
-    OPEN cur;  
-    LOOP
-        FETCH cur INTO rec;  
-        EXIT WHEN NOT FOUND;  
-        RAISE NOTICE 'ID Usuario: %, Nombre: %, ID Persona: %, Email: %, Rol: %',
-                     rec.id_usuario, rec.nombre, rec.id_persona, rec.email, rec.rol_nombre;
-    END LOOP;
-    CLOSE cur;  
-END;
-$$;
 
---consultar todos los usuarios
-CREATE OR REPLACE PROCEDURE consultar_todos_usuarios()
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    rec RECORD;  
-    cur CURSOR FOR 
-        SELECT 
-            usuario.id_usuario,
-            Persona.nombre,
-            Persona.ID_Persona,
-            usuario.email,
-            Rol.nombre AS nombre_rol,
-            Rol.ID_Rol AS id_rol  
-        FROM usuario
-        JOIN Persona ON usuario.id_persona = Persona.ID_Persona 
-        JOIN TRABAJADOR ON Persona.ID_Persona = TRABAJADOR.ID_PERSONA 
-        JOIN Rol ON TRABAJADOR.id_role = Rol.ID_Rol;
-BEGIN
-    OPEN cur;  
-    LOOP
-        FETCH cur INTO rec;  
-        EXIT WHEN NOT FOUND;  
-        RAISE NOTICE 'ID Usuario: %, Nombre: %, ID Persona: %, Email: %, Rol: %, ID Rol: %',
-                     rec.id_usuario, rec.nombre, rec.ID_Persona, rec.email, rec.nombre_rol, rec.id_rol;  
-    END LOOP;
-    CLOSE cur;  
-END;
-$$;
+GRANT EXECUTE ON FUNCTION sp_recuperar_muestra_por_id(INTEGER) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION sp_buscar_especimen_por_taxonomia(INTEGER, INTEGER, INTEGER, INTEGER, INTEGER, INTEGER, INTEGER) TO IDENTIFICADOR;
+GRANT SELECT ON vista_resumen_muestras TO IDENTIFICADOR;
+GRANT SELECT ON vista_detalle_muestra TO IDENTIFICADOR;
 
---procedimiento para eliminar usuario
-CREATE OR REPLACE PROCEDURE eliminar_usuario(
-    p_id_persona INTEGER  
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    -- Eliminar de la tabla TRABAJADOR 
-    DELETE FROM TRABAJADOR
-    WHERE ID_PERSONA = p_id_persona;
+GRANT EXECUTE ON FUNCTION Obtener_especimens(INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON PROCEDURE identificar_especimen(
+  INT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, 
+  TEXT[], TEXT[], TEXT[], TEXT[], TEXT[]
+) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_Epitelo(nameEpitelo TEXT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_genus(nameGenus TEXT, idFamily INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_family(nameFamily TEXT, idOrder INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_order(nameOrder TEXT, idClass INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_class(nameClass TEXT, idPhylum INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_phylum(namePhylum TEXT, idKingdom INT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_kingdom(nameKingdom TEXT) TO IDENTIFICADOR;
+GRANT EXECUTE ON FUNCTION insertar_contribuidores(contribuidores TEXT,acciones TEXT,detalles TEXT,apellidos_paternos_contribuidores TEXT,apellidos_maternos_contribuidores TEXT,id_datos INT) TO IDENTIFICADOR;
 
-    DELETE FROM usuario
-    WHERE id_persona = p_id_persona;
-	RAISE NOTICE 'Usuario con id persona: % eliminado',p_id_persona;
-END;
-$$;
+CREATE USER identificador_user WITH PASSWORD 'IdentifCE12';
+GRANT IDENTIFICADOR TO identificador_user;
+
+----------------------------------- PROFESOR
+
+CREATE ROLE PROFESOR;
+
+ALTER ROLE PROFESOR WITH CREATEROLE;
+GRANT SELECT,INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO PROFESOR;
+GRANT USAGE ON SCHEMA public TO PROFESOR;
+
+CREATE USER profesor_user_1 WITH PASSWORD '123456';
+GRANT PROFESOR TO profesor_user_1;
+CREATE ROLE PROFESOR;
+GRANT EXECUTE ON FUNCTION validar_usuarios(TEXT, TEXT) TO rol_validacion_usuarios;
+
+
+GRANT EXECUTE ON PROCEDURE crear_evento_de_coleccion(
+  DECIMAL, DECIMAL, VARCHAR, VARCHAR, VARCHAR, VARCHAR, TIMESTAMP, INT
+) TO PROFESOR;
+
+GRANT EXECUTE ON PROCEDURE Validar_Identificacion_especimen(INT, INT) TO PROFESOR;
 
 
 
@@ -133,3 +96,20 @@ $$;
 
 
 
+
+
+
+
+
+
+
+
+-- USUARIO PARA EL LOGIN
+CREATE ROLE USUARIOTEMP;
+GRANT SELECT ON Persona TO USUARIOTEMP;
+GRANT SELECT ON usuario TO USUARIOTEMP;
+GRANT SELECT ON rol TO USUARIOTEMP;
+GRANT SELECT ON trabajador TO USUARIOTEMP;
+
+CREATE USER usuario_temporal WITH PASSWORD '123456';
+GRANT USUARIOTEMP TO usuario_temporal;
