@@ -243,3 +243,32 @@ BEGIN
 
   RETURN id_epitelo_obtenida;
 END; $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE PROCEDURE sp_agregar_imagen_a_especimen(
+    p_catalogNumber INTEGER,
+    p_url TEXT,
+    p_idTipo INTEGER
+) 
+RETURNS VOID AS
+$$
+BEGIN
+    -- Verificar si el espécimen existe
+    IF NOT EXISTS (SELECT 1 FROM Especimen WHERE catalogNumber = p_catalogNumber) THEN
+        RAISE EXCEPTION 'Especimen con catalogNumber % no encontrado.', p_catalogNumber;
+    END IF;
+
+    -- Insertar la imagen en la tabla IMAGENES
+    INSERT INTO IMAGENES (url, idTipo) 
+    VALUES (p_url, p_idTipo);
+
+    -- Asociar la imagen con el espécimen en la tabla especimen_imagenes
+    INSERT INTO especimen_imagenes (id_especimen, id_foto) 
+    VALUES (p_catalogNumber, CURRVAL('imagenes_id_foto_seq'));
+    
+END;
+$$
+LANGUAGE plpgsql;
+call sp_agregar_imagen_a_especimen(12345, 'http://example.com/imagen.jpg', 1);
+
+

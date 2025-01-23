@@ -38,9 +38,9 @@ CALL insertar_especie(
   ARRAY['Doe', 'Garcia']::TEXT[], -- apellidos_paternos_contribuidores
   ARRAY['Smith', 'Lopez']::TEXT[], -- apellidos_maternos_contribuidores
   ARRAY['1985-03-12', '1990-07-22']::DATE[], -- fechas_contribuidores
-  'Collected'::VARCHAR, -- accion
-  'Found near a stream'::VARCHAR, -- detalles
-  6::INTEGER, -- id_Evento_coleccion
+  ARRAY['Collected''HOLA']::TEXT[], -- accion
+  ARRAY['Found near a stream','hola']::TEXT[], -- detalles
+  1::INTEGER, -- id_Evento_coleccion
   'todo bien'::TEXT,
   'longitud: 158.598 latitud: 23.4567'::TEXT -- coordenadas
 );
@@ -126,3 +126,4 @@ CALL identificar_especimen(
 
 
 CALL Validar_Identificacion_especimen(2::INTEGER,100::INTEGER)
+SELECT * FROM sp_buscar_especimen_por_taxonomia(1,NULL,NULL,NULL,NULL,NULL,NULL);

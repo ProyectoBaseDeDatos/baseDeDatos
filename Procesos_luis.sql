@@ -51,8 +51,8 @@ CREATE OR REPLACE PROCEDURE insertar_especie (
   apellidos_paternos_contribuidores TEXT[],
   apellidos_maternos_contribuidores TEXT[],
   fechas_contribuidores DATE[],
-  accion VARCHAR(255),
-  detalles VARCHAR(255),
+  accion TEXT[],
+  detalles TEXT[],
   id_evento_coleccion INT,
   descripcion TEXT,
   ubicacion_exacta TEXT
@@ -479,6 +479,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 CREATE OR REPLACE FUNCTION sp_buscar_especimen_por_taxonomia(
     p_kingdom INTEGER = NULL,
     p_phylum INTEGER = NULL,
