@@ -269,6 +269,6 @@ BEGIN
 END;
 $$
 LANGUAGE plpgsql;
-call sp_agregar_imagen_a_especimen(12345, 'http://example.com/imagen.jpg', 1);
+
 
 

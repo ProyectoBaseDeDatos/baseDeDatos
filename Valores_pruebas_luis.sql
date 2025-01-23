@@ -127,3 +127,4 @@ CALL identificar_especimen(
 
 CALL Validar_Identificacion_especimen(2::INTEGER,100::INTEGER)
 SELECT * FROM sp_buscar_especimen_por_taxonomia(1,NULL,NULL,NULL,NULL,NULL,NULL);
+call sp_agregar_imagen_a_especimen(12345, 'http://example.com/imagen.jpg', 1);
